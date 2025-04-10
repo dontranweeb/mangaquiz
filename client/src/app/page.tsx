@@ -48,8 +48,9 @@ export default function Page() {
 
       const serverUrl = serverJson?.baseUrl;
       const hash = serverJson?.chapter?.hash;
-      const pagePath = serverJson?.chapter?.dataSaver?.[0];
+      const pageLength = Math.floor(Math.random() * serverJson?.chapter?.dataSaver?.length);
 
+      const pagePath = serverJson?.chapter?.dataSaver?.[0];
       if (serverUrl && hash && pagePath) {
         const fullImageUrl = `${serverUrl}/data-saver/${hash}/${pagePath}`;
         setChapterUrl(fullImageUrl);
