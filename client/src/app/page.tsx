@@ -1,4 +1,5 @@
 'use client'
+import { time } from 'console';
 import { useState, useEffect } from 'react';
 
 export default function Page() {
@@ -10,9 +11,14 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState(false);
   const baseUrl = 'https://api.mangadex.org';
+  const [timeLeft, setTimeLeft] = useState<number>(30);
+  const [timerActive, setTimerActive] = useState<boolean>(false);
 
   const loadRandomManga = async () => {
+    setDisabled(false); //Re-enable form + button
     setMessage('');
+    setTimerActive(false);  //Reset before loading
+    setTimeLeft(30);
     setInput('');
     setChapterUrl(null);
     setTitle(null);
@@ -20,7 +26,13 @@ export default function Page() {
     setLoading(true);
 
     try {
-      const resp = await fetch(`${baseUrl}/manga/random?contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&includedTagsMode=AND&excludedTagsMode=OR`);
+      const resp = await fetch(`${baseUrl}/manga/random?
+        contentRating[]=safe&
+        contentRating[]=suggestive&
+        contentRating[]=erotica&
+        includedTagsMode=AND&
+        excludedTagsMode=OR`);
+
       const json = await resp.json();
       const fetchedTitle = json?.data?.attributes?.title?.en ?? null;
       const fetchedId = json?.data?.id ?? null;
@@ -46,14 +58,16 @@ export default function Page() {
       const serverResp = await fetch(`${baseUrl}/at-home/server/${chapterId}`);
       const serverJson = await serverResp.json();
 
+      // Build the Image URL
       const serverUrl = serverJson?.baseUrl;
       const hash = serverJson?.chapter?.hash;
       const pageLength = Math.floor(Math.random() * serverJson?.chapter?.dataSaver?.length);
+      const pagePath = serverJson?.chapter?.dataSaver?.[pageLength];
 
-      const pagePath = serverJson?.chapter?.dataSaver?.[0];
       if (serverUrl && hash && pagePath) {
         const fullImageUrl = `${serverUrl}/data-saver/${hash}/${pagePath}`;
         setChapterUrl(fullImageUrl);
+        setTimerActive(true); // Makes sure timer starts when there IS an image
       }
     } catch (err) {
       console.error('Error fetching manga:', err);
@@ -79,16 +93,59 @@ export default function Page() {
     );
 
     setDisabled(true);
+    setTimerActive(false); // Stop countdown after clicking
 
     setTimeout(() => {
       loadRandomManga();
       setDisabled(false); 
     }, 2000);
   };
+  
+  // Timer of 30 seconds
+  useEffect(() => {
+    if (!timerActive || timeLeft === 0) return;
+
+    // Decrement by 1
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, timerActive]);
+
+  // When timer runs out
+  useEffect(() => {
+    if (timeLeft === 0) {
+      setDisabled(true);
+      setMessage(`Time is up! The answer was "${title}"`);
+    }
+  }, [timeLeft]);
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
       <h1>Guess the Manga Title</h1>
+
+
+      <p style={{ fontSize: '1rem', marginTop: '1rem' }}>
+          Time Left: {timeLeft} seconds
+        </p>
+
+        <div style={{     // Timer bar
+          width: '75%',
+          height: '20px',
+          backgroundColor: '#ddd',
+          marginTop: '0.5rem',
+          marginBottom: '0.5rem',
+          borderRadius: '8px',
+          overflow: 'hidden'
+        }}>
+          <div style={{
+            height: '100%',
+            width: `${(timeLeft / 30) * 100}%`, // Smooth decrease because dependent on timeLeft
+            backgroundColor: timeLeft > 10 ? '#4CAF50' : '#FF4C4C', // if timeLeft > 10, bar is green. If not then red
+            transition: 'width 1s linear'
+          }} />
+        </div>
 
       <form onSubmit={handleSubmit}>
         <input
@@ -108,7 +165,7 @@ export default function Page() {
         </button>
       </form>
 
-      {message && <p style={{ marginTop: '1rem' }}>{message}</p>}
+      {message && <p style={{ marginBottom: '1rem' }}>{message}</p>}
       {id && <p>Manga ID: {id}</p>}
       {title && <p>Correct Title: {title}</p>}
 
@@ -142,7 +199,7 @@ export default function Page() {
           border: 'none',
           cursor: 'pointer',
         }}
-        disabled={loading || disabled}
+        disabled={loading}
       >
         Next Manga
       </button>
