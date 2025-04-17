@@ -18,6 +18,8 @@ export default function Page() {
   const [scanName, setScanName] = useState(null);
   const [twitter, setTwitter] = useState(null);
   const [website, setWebsite] = useState(null);
+  const [score, setScore] = useState(0);
+
   const loadRandomManga = async () => {
     setDisabled(false); //Re-enable form + button
     setMessage('');
@@ -106,6 +108,10 @@ export default function Page() {
 
     const isCorrect = input.trim().toLowerCase() === title?.trim().toLowerCase();
 
+    if(isCorrect) {
+      setScore((prev) => prev + 100);
+    }
+
     setMessage(
       isCorrect
         ? `Correct! The answer is "${title}"`
@@ -119,6 +125,8 @@ export default function Page() {
       loadRandomManga();
       setDisabled(false); 
     }, 2000);
+
+
   };
   
   // Timer of 30 seconds
@@ -152,6 +160,10 @@ export default function Page() {
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial' }}>
       <h1>Guess the Manga Title</h1>
+
+      <p style={{ fontSize: '1rem', fontWeight: 'bold', color: '#4CAF50' }}>
+        Score: {score}
+      </p>
 
 
       <p style={{ fontSize: '1rem', marginTop: '1rem' }}>
