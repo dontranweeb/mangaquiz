@@ -14,7 +14,10 @@ export default function Page() {
   const baseUrl = 'https://api.mangadex.org';
   const [timeLeft, setTimeLeft] = useState<number>(30);
   const [timerActive, setTimerActive] = useState<boolean>(false);
-
+  const [scan, setScan] = useState(null);
+  const [scanName, setScanName] = useState(null);
+  const [twitter, setTwitter] = useState(null);
+  const [website, setWebsite] = useState(null);
   const loadRandomManga = async () => {
     setDisabled(false); //Re-enable form + button
     setMessage('');
@@ -23,6 +26,7 @@ export default function Page() {
     setInput('');
     setChapterUrl(null);
     setTitle(null);
+    setScan(null);
     setId(null);
     setLoading(true);
 
@@ -59,11 +63,26 @@ export default function Page() {
       const serverResp = await fetch(`${baseUrl}/at-home/server/${chapterId}`);
       const serverJson = await serverResp.json();
 
+      // Step 5: Grabbing scanlator from chapter
+      const scanResp = await fetch(`${baseUrl}/chapter/${chapterId}?includes%5B%5D=scanlation_group`);
+      const scanJson = await scanResp.json();
+      const scanID =  scanJson?.data?.relationships[0].id ?? null;
+      setScan(scanID);
+      const scanName =  scanJson?.data?.relationships[0].attributes?.name ?? null;
+      setScanName(scanName);
+
+      const site = await fetch(`${baseUrl}/group/${scanID}?includes%5B%5D=leader`);
+      const siteJson = await site.json();
+      const site_website =  siteJson?.data?.attributes?.website ?? null;
+      const site_twitter = siteJson?.data?.attributes?.twitter ?? null;
+      setTwitter(site_twitter);
+      setWebsite(site_website);
       // Build the Image URL
       const serverUrl = serverJson?.baseUrl;
       const hash = serverJson?.chapter?.hash;
       const pageLength = Math.floor(Math.random() * serverJson?.chapter?.dataSaver?.length);
       const pagePath = serverJson?.chapter?.dataSaver?.[pageLength];
+
 
       if (serverUrl && hash && pagePath) {
         const fullImageUrl = `${serverUrl}/data-saver/${hash}/${pagePath}`;
@@ -177,7 +196,10 @@ export default function Page() {
       {message && <p style={{ marginBottom: '1rem' }}>{message}</p>}
       {id && <p>Manga ID: {id}</p>}
       {title && <p>Correct Title: {title}</p>}
-
+      {scan && <p>ScanID: {scan}</p>}
+      {scanName && <p> Scanlations Name: {scanName}</p>}
+      {website && <a href={website}> Website: {website} </a>}
+      {twitter &&  <a href={twitter}> Twitter </a>}
       {loading ? (
         <p>Loading manga...</p>
       ) : chapterUrl ? (
