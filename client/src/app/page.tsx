@@ -1,5 +1,6 @@
 'use client'
 import { time } from 'console';
+import next from 'next';
 import { useState, useEffect } from 'react';
 
 export default function Page() {
@@ -118,6 +119,14 @@ export default function Page() {
     if (timeLeft === 0) {
       setDisabled(true);
       setMessage(`Time is up! The answer was "${title}"`);
+
+      const nextTimeout = setTimeout(() => {
+        loadRandomManga();
+        setDisabled(false); // re-enable input
+      }, 2000); // 2 seconds
+
+      return () => clearTimeout(nextTimeout) // in case user refreshes 
+                                            // or program runs loadRandomManga
     }
   }, [timeLeft]);
 
