@@ -210,8 +210,8 @@ export default function Page() {
       {title && <p>Correct Title: {title}</p>}
       {scan && <p>ScanID: {scan}</p>}
       {scanName && <p> Scanlations Name: {scanName}</p>}
-      {website && <a href={website}> Website: {website} </a>}
-      {twitter &&  <a href={twitter}> Twitter </a>}
+      {website && <a href={website} target="_blank" rel="noopener noreferrer"> Website: {website} </a>}
+      {twitter &&  <a href={twitter} target="_blank" rel="noopener noreferrer"> Twitter </a>}
       {loading ? (
         <p>Loading manga...</p>
       ) : chapterUrl ? (
