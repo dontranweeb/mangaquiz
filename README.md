@@ -2,7 +2,7 @@
 
 ## ACKNOWLEDGEMENT
 
-Grateful Mangadex for providing this API allowing us to play "quiz" like gameplay for users to guess and recognize mangas they have read.
+Grateful to Mangadex for providing this API allowing us to play "quiz" like gameplay for users to guess and recognize mangas they have read.
 
 
 ### Current Progress
