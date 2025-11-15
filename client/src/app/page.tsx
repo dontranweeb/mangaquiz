@@ -218,19 +218,19 @@ export default function Page() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter the title"
-              style={{ padding: '0.5rem', fontSize: '1rem' }}
+              className="form-input"
               disabled={disabled}
             />
             <button
               type="submit"
-              style={{ marginLeft: '1rem', padding: '0.5rem 1rem' }}
+              className="btn-submit"
               disabled={disabled}
             >
               Check
             </button>
           </form>
 
-          {message && <p style={{ marginBottom: '1rem' }}>{message}</p>}
+          {message && <p className="message-text">{message}</p>}
           {/* {id && <p>Manga ID: {id}</p>}
           {title && <p>Correct Title: {title}</p>}
           {scan && <p>ScanID: {scan}</p>}
@@ -240,43 +240,24 @@ export default function Page() {
           {loading ? (
             <p>Loading manga...</p>
           ) : chapterUrl ? (
-            <div style={{ marginTop: '2rem' }}>
+            <div className="image-container">
               <h2>Random Page Preview:</h2>
               <img
                 src={chapterUrl}
                 alt="Manga Page"
                 onClick={() => setIsimageModalOpen(true)}
-                style={{ 
-                  maxWidth: '90vw',
-                  maxHeight: '60vh',
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  border: '1px solid #ccc',
-                  cursor: 'pointer'
-                }}
+                className="manga-image"
               />
             </div>
           ) : (
             <p>No image to show. Try again!</p>
           )}
           <div
-            style = {{
-              display: 'flex',
-              gap: '0.75rem',
-              marginTop: '1rem'
-            }}
+            className="btn-container"
           >
             <button
               onClick={loadRandomManga}
-              style={{
-                marginTop: '1rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="btn-success"
               disabled={loading}
             >
               Next Manga
@@ -290,15 +271,7 @@ export default function Page() {
                 setChapterUrl('');
                 setTimerActive(false);
               }}
-              style = {{
-                marginTop: '1rem',
-                marginLeft: '1rem;',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer'
-              }}
+              className="btn-danger"
             >
               Exit to Lobby
             </button>
@@ -309,35 +282,13 @@ export default function Page() {
       {isImageModalOpen && (
         <div
           onClick={() => setIsimageModalOpen(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            cursor: 'pointer',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blue(6px)'
-          }}
+          className="modal-overlay"
         >
           <img
             src={chapterUrl ?? undefined}
             alt="Manga Page - Full Size"
             onClick = {(e) => e.stopPropagation()}
-            style = {{
-                maxWidth: '90vw',
-                maxHeight: '90vh',
-                width: 'auto',
-                height: 'auto',
-                objectFit: 'contain',
-                cursor: 'pointer'
-              }}
-            
+            className="modal-image"
           />
         </div>
       )}
