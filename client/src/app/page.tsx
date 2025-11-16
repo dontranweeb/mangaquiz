@@ -23,10 +23,18 @@ export default function Page() {
   const [score, setScore] = useState(0);           // these 5 hold the score
 
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+  const [isGameEnded, setIsGameEnded] = useState<boolean>(false);
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isImageModalOpen, setIsimageModalOpen] = useState<boolean>(false);
 
   const loadRandomManga = async () => {
+
+    if (currentRound >= 20) {
+      setIsGameEnded(true);
+      setTimerActive(false);
+      return;
+    }
+
     setDisabled(false); //Re-enable form + button
     setMessage('');
     setTimerActive(false);  //Reset before loading
@@ -133,12 +141,14 @@ export default function Page() {
 
     setDisabled(true);
     setTimerActive(false); // Stop countdown after clicking
+    
 
     setTimeout(() => {
-      loadRandomManga();
-      setDisabled(false); 
+      if (!isGameEnded) {
+        loadRandomManga();
+        setDisabled(false); 
+      }
     }, 2000);
-
 
   };
   
@@ -156,13 +166,15 @@ export default function Page() {
 
   // When timer runs out
   useEffect(() => {
-    if (timeLeft === 0) {
+    if (timeLeft === 0 && !isGameEnded) {
       setDisabled(true);
       setMessage(`Time is up! The answer was "${title}"`);
 
       const nextTimeout = setTimeout(() => {
-        loadRandomManga();
-        setDisabled(false); // re-enable input
+        if (!isGameEnded) {
+          loadRandomManga();
+          setDisabled(false); // re-enable input
+        }
       }, 2000); // 2 seconds
 
       return () => clearTimeout(nextTimeout) // in case user refreshes 
@@ -185,6 +197,15 @@ export default function Page() {
           >
             Play
           </button>
+        </div>
+      ) : isGameEnded ? (
+        // Results screen
+        <div className="lobby">
+          <h1 className='lobby-title'>Game Over!</h1>
+          <p className="results-score">Final Score: {score} / 20</p>
+          <p className="results-percentage">
+            {Math.round((score / 20) * 100)}% Correct
+          </p>
         </div>
       ) : (
         <div className="game-container">
