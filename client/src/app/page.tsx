@@ -23,10 +23,18 @@ export default function Page() {
   const [score, setScore] = useState(0);           // these 5 hold the score
 
   const [isGameStarted, setIsGameStarted] = useState<boolean>(false);
+  const [isGameEnded, setIsGameEnded] = useState<boolean>(false);
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isImageModalOpen, setIsimageModalOpen] = useState<boolean>(false);
 
   const loadRandomManga = async () => {
+
+    if (currentRound >= 20) {
+      setIsGameEnded(true);
+      setTimerActive(false);
+      return;
+    }
+
     setDisabled(false); //Re-enable form + button
     setMessage('');
     setTimerActive(false);  //Reset before loading
@@ -133,12 +141,14 @@ export default function Page() {
 
     setDisabled(true);
     setTimerActive(false); // Stop countdown after clicking
+    
 
     setTimeout(() => {
-      loadRandomManga();
-      setDisabled(false); 
+      if (!isGameEnded) {
+        loadRandomManga();
+        setDisabled(false); 
+      }
     }, 2000);
-
 
   };
   
@@ -156,13 +166,15 @@ export default function Page() {
 
   // When timer runs out
   useEffect(() => {
-    if (timeLeft === 0) {
+    if (timeLeft === 0 && !isGameEnded) {
       setDisabled(true);
       setMessage(`Time is up! The answer was "${title}"`);
 
       const nextTimeout = setTimeout(() => {
-        loadRandomManga();
-        setDisabled(false); // re-enable input
+        if (!isGameEnded) {
+          loadRandomManga();
+          setDisabled(false); // re-enable input
+        }
       }, 2000); // 2 seconds
 
       return () => clearTimeout(nextTimeout) // in case user refreshes 
@@ -185,6 +197,15 @@ export default function Page() {
           >
             Play
           </button>
+        </div>
+      ) : isGameEnded ? (
+        // Results screen
+        <div className="lobby">
+          <h1 className='lobby-title'>Game Over!</h1>
+          <p className="results-score">Final Score: {score} / 20</p>
+          <p className="results-percentage">
+            {Math.round((score / 20) * 100)}% Correct
+          </p>
         </div>
       ) : (
         <div className="game-container">
@@ -218,19 +239,19 @@ export default function Page() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Enter the title"
-              style={{ padding: '0.5rem', fontSize: '1rem' }}
+              className="form-input"
               disabled={disabled}
             />
             <button
               type="submit"
-              style={{ marginLeft: '1rem', padding: '0.5rem 1rem' }}
+              className="btn-submit"
               disabled={disabled}
             >
               Check
             </button>
           </form>
 
-          {message && <p style={{ marginBottom: '1rem' }}>{message}</p>}
+          {message && <p className="message-text">{message}</p>}
           {/* {id && <p>Manga ID: {id}</p>}
           {title && <p>Correct Title: {title}</p>}
           {scan && <p>ScanID: {scan}</p>}
@@ -240,43 +261,24 @@ export default function Page() {
           {loading ? (
             <p>Loading manga...</p>
           ) : chapterUrl ? (
-            <div style={{ marginTop: '2rem' }}>
+            <div className="image-container">
               <h2>Random Page Preview:</h2>
               <img
                 src={chapterUrl}
                 alt="Manga Page"
                 onClick={() => setIsimageModalOpen(true)}
-                style={{ 
-                  maxWidth: '90vw',
-                  maxHeight: '60vh',
-                  width: 'auto',
-                  height: 'auto',
-                  objectFit: 'contain',
-                  border: '1px solid #ccc',
-                  cursor: 'pointer'
-                }}
+                className="manga-image"
               />
             </div>
           ) : (
             <p>No image to show. Try again!</p>
           )}
           <div
-            style = {{
-              display: 'flex',
-              gap: '0.75rem',
-              marginTop: '1rem'
-            }}
+            className="btn-container"
           >
             <button
               onClick={loadRandomManga}
-              style={{
-                marginTop: '1rem',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#4CAF50',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              className="btn-success"
               disabled={loading}
             >
               Next Manga
@@ -290,15 +292,7 @@ export default function Page() {
                 setChapterUrl('');
                 setTimerActive(false);
               }}
-              style = {{
-                marginTop: '1rem',
-                marginLeft: '1rem;',
-                padding: '0.5rem 1rem',
-                backgroundColor: '#f44336',
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer'
-              }}
+              className="btn-danger"
             >
               Exit to Lobby
             </button>
@@ -309,35 +303,13 @@ export default function Page() {
       {isImageModalOpen && (
         <div
           onClick={() => setIsimageModalOpen(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            cursor: 'pointer',
-            backdropFilter: 'blur(6px)',
-            WebkitBackdropFilter: 'blue(6px)'
-          }}
+          className="modal-overlay"
         >
           <img
             src={chapterUrl ?? undefined}
             alt="Manga Page - Full Size"
             onClick = {(e) => e.stopPropagation()}
-            style = {{
-                maxWidth: '90vw',
-                maxHeight: '90vh',
-                width: 'auto',
-                height: 'auto',
-                objectFit: 'contain',
-                cursor: 'pointer'
-              }}
-            
+            className="modal-image"
           />
         </div>
       )}

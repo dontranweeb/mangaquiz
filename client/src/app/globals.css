@@ -89,3 +89,101 @@ body {
   height: 100%;
   transition: width 1s linear;
 }
+
+.form-input {
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.btn-submit {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.message-text {
+  margin-bottom: 1rem;
+}
+
+.btn-container {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn-success {
+  padding: 0.5rem 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger {
+  padding: 0.5rem 1rem;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.image-container {
+  margin-top: 2rem;
+}
+
+.manga-image {
+  max-width: 90vw;
+  max-height: 60vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 2rem;
+  z-index: 1000;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-image {
+  max-width: 90vw;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  margin: auto;
+}
+
+.results-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.resulpts-score {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.results-percentage {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4caf50;
+}
