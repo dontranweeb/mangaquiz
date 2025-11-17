@@ -1,5 +1,5 @@
 'use client'
-import { FormEvent, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Page() {
   const baseUrl = 'https://api.mangadex.org';
@@ -27,6 +27,9 @@ export default function Page() {
   const [currentRound, setCurrentRound] = useState<number>(0);
   const [isImageModalOpen, setIsimageModalOpen] = useState<boolean>(false);
 
+  const [options, setOptions] = useState<string[]>([]); // Array of 4 title choices (1 correct + 3 wrong)
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // Track the user's selected answer
+
   const loadRandomManga = async () => {
 
     if (currentRound >= 20) {
@@ -36,7 +39,6 @@ export default function Page() {
     }
 
     setDisabled(false); //Re-enable form + button
-    setMessage('');
     setTimerActive(false);  //Reset before loading
     setTimeLeft(30);
     setInput('');
@@ -46,7 +48,12 @@ export default function Page() {
     setId(null);
     setLoading(true);
 
-    try {
+    let imageFound = false;
+    let retryCount = 0;
+    const maxRetries = 10;
+    
+    while (!imageFound && retryCount < maxRetries) {
+      try {
       // Step 1: Get random manga
       const resp = await fetch(`${baseUrl}/manga/random?
         contentRating[]=safe&
@@ -62,7 +69,47 @@ export default function Page() {
       setTitle(fetchedTitle);
       setId(fetchedId);
 
-      if (!fetchedId) return;
+      // Fetch 3 random wrong answers
+      const wrongAnswer: string[] = [];
+      let attempts = 0;
+      const maxAttempts = 10; // prevent infinite looping
+
+      while (wrongAnswer.length < 3 && attempts < maxAttempts) {
+        try {
+          const wrongResp = await fetch(`${baseUrl}/manga/random?
+            contentRating[]=safe&
+            contentRating[]=suggestive&
+            contentRating[]=erotica&
+            includedTagsMode=AND&
+            excludedTagsMode=OR`);
+          const wrongJson = await wrongResp.json();
+          const wrongTitle = wrongJson?.data?.attributes?.title?.en ?? null;
+
+          // make sure wrong option is not the same as correct answer and not already in array
+          if (wrongTitle && 
+            wrongTitle.trim().toLowerCase() !== fetchedTitle?.trim().toLowerCase() &&
+          !wrongAnswer.includes(wrongTitle)) {
+            wrongAnswer.push(wrongTitle);
+          }
+        } catch (err) {
+          console.error('Error fetching wrong answer:', err);
+        }
+        attempts++;
+      }
+
+      // Combine correct + wrong answers, then shuffle
+      const allOptions = [fetchedTitle, ...wrongAnswer].filter(Boolean).slice(0,4); // max of 4
+
+      // shuffle array (fisher yates alg)
+      for (let i = allOptions.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
+      }
+
+      setOptions(allOptions);
+      setSelectedAnswer(null);
+
+      if (!fetchedId) continue;
 
       const feedResp = await fetch(`${baseUrl}/manga/${fetchedId}/feed`);
       const feedJson = await feedResp.json();
@@ -70,7 +117,7 @@ export default function Page() {
 
       if (chapters.length === 0) {
         console.log('No chapters found');
-        return;
+        continue;
       }
 
       // Step 3: Random chapter
@@ -107,13 +154,26 @@ export default function Page() {
         const fullImageUrl = `${serverUrl}/data-saver/${hash}/${pagePath}`;
         setChapterUrl(fullImageUrl);
         setTimerActive(true); // Makes sure timer starts when there IS an image
-        setCurrentRound((prev) => prev + 1); // Increment round
+        setCurrentRound((prev) => prev + 1);
+        imageFound = true; // Exit the loop, we found an image
+      } else {
+        // No image found, will retry
+        retryCount++;
       }
-    } catch (err) {
-      console.error('Error fetching manga:', err);
-    } finally {
-      setLoading(false);
+      } catch (err) {
+        console.error('Error fetching manga:', err);
+        retryCount++;
+        continue; // Skip to next iteration of while loop
+      }
+      
+      // If image wasn't found, increment retry count
+      if (!imageFound) {
+        retryCount++;
+      }
     }
+    
+    // After while loop ends
+    setLoading(false);
   };
 
   // Initial load       --> removed auto loading, we will load when user clicks PLay
@@ -121,13 +181,10 @@ export default function Page() {
   //  loadRandomManga();
   //}, []);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
+  const handleAnswer = (selectedOption: string) => {
     if (!title) return;
-    const guess = input.trim().toLowerCase();
-    const answer = title.trim().toLowerCase();
-    const isCorrect = guess === answer;
+
+    const isCorrect = selectedOption.trim().toLowerCase() === title.trim().toLowerCase();
 
     if(isCorrect) {
       setScore((prev) => prev + 1);
@@ -206,6 +263,26 @@ export default function Page() {
           <p className="results-percentage">
             {Math.round((score / 20) * 100)}% Correct
           </p>
+          <button className="btn-primary" onClick={() => {
+            setIsGameEnded(false);
+            setIsGameStarted(true);
+            setCurrentRound(0);
+            setScore(0);
+            loadRandomManga();
+          }}>
+            Play Again
+          </button>
+          <button className='btn-danger' onClick={() => {
+            setIsGameStarted(false);
+            setIsGameEnded(false);
+            setCurrentRound(0);
+            setScore(0);
+            setMessage('');
+            setChapterUrl(null);
+            setTimerActive(false);
+          }}>
+            Exit to Lobby
+          </button>
         </div>
       ) : (
         <div className="game-container">
@@ -223,33 +300,6 @@ export default function Page() {
           <p className="timer-text">
               Time Left: {timeLeft} seconds
             </p>
-
-            <div className="timer-bar-container">
-              <div className="timer-bar-fill" 
-                style={{
-                width: `${(timeLeft / 30) * 100}%`, // Smooth decrease because dependent on timeLeft
-                backgroundColor: timeLeft > 10 ? '#4CAF50' : '#FF4C4C', // if timeLeft > 10, bar is green. If not then red
-                }} 
-              />
-            </div>
-
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Enter the title"
-              className="form-input"
-              disabled={disabled}
-            />
-            <button
-              type="submit"
-              className="btn-submit"
-              disabled={disabled}
-            >
-              Check
-            </button>
-          </form>
 
           {message && <p className="message-text">{message}</p>}
           {/* {id && <p>Manga ID: {id}</p>}
@@ -273,6 +323,27 @@ export default function Page() {
           ) : (
             <p>No image to show. Try again!</p>
           )}
+
+          <div className="options-container">
+            {options.length > 0 ? (
+              options.map((option, index) => (
+                <button 
+                  key={index}
+                  onClick={() => {
+                    if (disabled) return;
+                    setSelectedAnswer(option);
+                    handleAnswer(option);
+                  }}
+                  className={`option-button ${selectedAnswer === option ? 'selected' : ''}`}
+                  disabled={disabled}
+                >
+                  {option}
+                </button>
+              ))
+            ) : (
+              <p>Loading options...</p>
+            )}
+          </div>
           <div
             className="btn-container"
           >
@@ -282,6 +353,12 @@ export default function Page() {
               disabled={loading}
             >
               Next Manga
+            </button>
+            <button className="btn-danger" onClick={() => {
+              setIsGameEnded(true);
+              setTimerActive(false);
+              }}>
+              End Game
             </button>
             <button
               onClick = {() => {
