@@ -67,14 +67,20 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.game-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fac2ff;
+}
+
 .round-display {
-  font-size: 1rem;
+  font-size: 1.6rem;
   font-weight: bold;
   margin-bottom: 1rem;
 }
 
 .score-display {
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: bold;
   color: #4caf50;
 }
@@ -84,21 +90,6 @@ body {
   font-weight: bold;
   margin-top: 1rem;
   text-align: center;
-}
-
-.timer-bar-container{
-  width: 75%;
-  height: 20px;
-  background-color: #ddd;
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.timer-bar-fill {
-  height: 100%;
-  transition: width 1s linear;
 }
 
 .form-input {
@@ -200,8 +191,8 @@ body {
 }
 
 .options-container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
   width: 100%;
   max-width: 600px;
