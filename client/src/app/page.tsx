@@ -42,6 +42,7 @@ export default function Page() {
     setTimerActive(false);  //Reset before loading
     setTimeLeft(30);
     setInput('');
+    setMessage('');
     setChapterUrl(null);
     setTitle(null);
     setScan(null);
@@ -205,7 +206,7 @@ export default function Page() {
         loadRandomManga();
         setDisabled(false); 
       }
-    }, 2000);
+    }, 5000);
 
   };
   
@@ -225,17 +226,21 @@ export default function Page() {
   useEffect(() => {
     if (timeLeft === 0 && !isGameEnded) {
       setDisabled(true);
-      setMessage(`Time is up! The answer was "${title}"`);
 
-      const nextTimeout = setTimeout(() => {
-        if (!isGameEnded) {
-          loadRandomManga();
-          setDisabled(false); // re-enable input
-        }
-      }, 2000); // 2 seconds
+      if (selectedAnswer) {
+        handleAnswer(selectedAnswer);
+      } else {
+        setMessage(`Time is up! The answer was "${title}"`);
 
-      return () => clearTimeout(nextTimeout) // in case user refreshes 
-                                            // or program runs loadRandomManga
+        const nextTimeout = setTimeout(() => {
+          if (!isGameEnded) {
+            loadRandomManga();
+            setDisabled(false); // re-enable input
+          }
+        }, 5000); // 5 seconds
+
+        return () => clearTimeout(nextTimeout) // in case user refreshes 
+      }                                      // or program runs loadRandomManga
     }
   }, [timeLeft]);
 
@@ -286,7 +291,7 @@ export default function Page() {
         </div>
       ) : (
         <div className="game-container">
-          <h1>Guess the Manga Title</h1>
+          <h1 className="game-title">Guess the Manga!</h1>
 
           <p className="round-display">
             Round {currentRound}/20
@@ -332,7 +337,6 @@ export default function Page() {
                   onClick={() => {
                     if (disabled) return;
                     setSelectedAnswer(option);
-                    handleAnswer(option);
                   }}
                   className={`option-button ${selectedAnswer === option ? 'selected' : ''}`}
                   disabled={disabled}
