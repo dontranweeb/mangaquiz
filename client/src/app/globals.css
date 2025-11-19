@@ -83,6 +83,42 @@ body {
   font-size: 1.5rem;
   font-weight: bold;
   color: #4caf50;
+  position: relative;
+}
+
+.score-animation {
+  display: inline-block;
+  margin-left: 0.5rem;
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 1.2rem;
+  animation: scoreBounce 1.5s ease-out forwards;
+  position: absolute;
+}
+
+@keyframes scoreBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scale(0.5);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.2);
+  }
+  40% {
+    transform: translateY(-20px) scale(1);
+  }
+  60% {
+    transform: translateY(-30px) scale(1.1);
+  }
+  80% {
+    transform: translateY(-40px) scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-50px) scale(0.8);
+    opacity: 0;
+  }
 }
 
 .timer-text {
@@ -280,6 +316,68 @@ body {
   height: calc(100vh - 3rem); /* Full height minus padding */
   position: sticky;
   top: 1.5rem;
+}
+
+/* Panel titles */
+.panel-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.75rem;
+}
+
+/* Placeholder text */
+.panel-placeholder {
+  color: #999;
+  font-style: italic;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* Manga info content */
+.manga-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.manga-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.scanlation-name {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Chat specific styles */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+}
+
+.chat-input-container {
+  border-top: 1px solid #e5e5e5;
+  padding-top: 1rem;
+}
+
+.chat-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.chat-input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
 }
 
 /* Responsive Design - Tablet Layout */

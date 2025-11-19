@@ -29,6 +29,13 @@ export default function Page() {
 
   const [options, setOptions] = useState<string[]>([]); // Array of 4 title choices (1 correct + 3 wrong)
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null); // Track the user's selected answer
+  const [previousRoundInfo, setPreviousRoundInfo] = useState<{
+    title: string | null,
+    scanName: string | null;
+    // other info later
+  } | null>(null);
+  const [showScoreAnimation, setShowScoreAnimation] = useState<boolean>(false);
+
 
   const loadRandomManga = async () => {
 
@@ -43,6 +50,7 @@ export default function Page() {
     setTimeLeft(30);
     setInput('');
     setMessage('');
+    setPreviousRoundInfo(null);
     setChapterUrl(null);
     setTitle(null);
     setScan(null);
@@ -189,6 +197,9 @@ export default function Page() {
 
     if(isCorrect) {
       setScore((prev) => prev + 1);
+      setShowScoreAnimation(true);
+      // Animation lasts 1.5 seconds, then hide it
+      setTimeout(() => setShowScoreAnimation(false), 1500);
     }
 
     setMessage(
@@ -199,6 +210,12 @@ export default function Page() {
 
     setDisabled(true);
     setTimerActive(false); // Stop countdown after clicking
+
+    setPreviousRoundInfo({
+      title: title,
+      scanName: scanName,
+      // other fields later
+    })
     
 
     setTimeout(() => {
@@ -290,88 +307,121 @@ export default function Page() {
           </button>
         </div>
       ) : (
-        <div className="game-container">
-          <h1 className="game-title">Guess the Manga!</h1>
+        <div className="game-layout">
+          {/* Left Panel - Manga Info Panel */}
+          <aside className="manga-info-panel">
+            <h3 className="panel-title">Manga Info</h3>
+            {title ? (
+              <div className="manga-info-content">
+                <p className="manga-title">{previousRoundInfo?.title}</p>
+                {previousRoundInfo?.scanName && <p className="scanlation-name">Scanlations by: {previousRoundInfo.scanName}</p>}
+                {/* more info later */}
+              </div>
+            ) : (
+              <p className="panel-placeholder">Info will appear after each round</p>
+            )}
+          </aside>
 
-          <p className="round-display">
-            Round {currentRound}/20
-          </p>
+          {/* Center Panel - Game Content */}
+          <main className="game-content-panel">
+            <h1 className="game-title">Guess the Manga!</h1>
 
-          <p className="score-display">
-            Score: {score}
-          </p>
+            <p className="round-display">
+              Round {currentRound}/20
+            </p>
 
+            <p className="score-display">
+              Score: {score}
+              {showScoreAnimation && (
+                <span className="score-animation">+1</span>
+              )}
+            </p>
 
-          <p className="timer-text">
+            <p className="timer-text">
               Time Left: {timeLeft} seconds
             </p>
 
-          {message && <p className="message-text">{message}</p>}
-          {/* {id && <p>Manga ID: {id}</p>}
-          {title && <p>Correct Title: {title}</p>}
-          {scan && <p>ScanID: {scan}</p>}
-          {scanName && <p> Scanlations Name: {scanName}</p>}
-          {website && <a href={website}> Website: {website} </a>}
-          {twitter &&  <a href={twitter}> Twitter </a>} */}
-          {loading ? (
-            <p>Loading manga...</p>
-          ) : chapterUrl ? (
-            <div className="image-container">
-              <h2>Random Page Preview:</h2>
-              <img
-                src={chapterUrl}
-                alt="Manga Page"
-                onClick={() => setIsimageModalOpen(true)}
-                className="manga-image"
+            {message && <p className="message-text">{message}</p>}
+            {/* {id && <p>Manga ID: {id}</p>}
+            {title && <p>Correct Title: {title}</p>}
+            {scan && <p>ScanID: {scan}</p>}
+            {scanName && <p> Scanlations Name: {scanName}</p>}
+            {website && <a href={website}> Website: {website} </a>}
+            {twitter &&  <a href={twitter}> Twitter </a>} */}
+            {loading ? (
+              <p>Loading manga...</p>
+            ) : chapterUrl ? (
+              <div className="image-container">
+                <h2>Random Page Preview:</h2>
+                <img
+                  src={chapterUrl}
+                  alt="Manga Page"
+                  onClick={() => setIsimageModalOpen(true)}
+                  className="manga-image"
+                />
+              </div>
+            ) : (
+              <p>No image to show. Try again!</p>
+            )}
+
+            <div className="options-container">
+              {options.length > 0 ? (
+                options.map((option, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => {
+                      if (disabled) return;
+                      setSelectedAnswer(option);
+                    }}
+                    className={`option-button ${selectedAnswer === option ? 'selected' : ''}`}
+                    disabled={disabled}
+                  >
+                    {option}
+                  </button>
+                ))
+              ) : (
+                <p>Loading options...</p>
+              )}
+            </div>
+            
+            <div className="btn-container">
+              <button className="btn-danger" onClick={() => {
+                setIsGameEnded(true);
+                setTimerActive(false);
+              }}>
+                End Game
+              </button>
+              <button
+                onClick={() => {
+                  setIsGameStarted(false);
+                  setCurrentRound(0);
+                  setScore(0);
+                  setMessage('');
+                  setChapterUrl('');
+                  setTimerActive(false);
+                }}
+                className="btn-danger"
+              >
+                Exit to Lobby
+              </button>
+            </div>
+          </main>
+
+          {/* Right Panel - Chat */}
+          <aside className="chat-panel">
+            <h3 className="panel-title">Chat</h3>
+            <div className="chat-messages">
+              <p className="panel-placeholder">Chat coming soon!</p>
+            </div>
+            <div className="chat-input-container">
+              <input 
+                type="text" 
+                placeholder="Type a message..." 
+                className="chat-input"
+                disabled
               />
             </div>
-          ) : (
-            <p>No image to show. Try again!</p>
-          )}
-
-          <div className="options-container">
-            {options.length > 0 ? (
-              options.map((option, index) => (
-                <button 
-                  key={index}
-                  onClick={() => {
-                    if (disabled) return;
-                    setSelectedAnswer(option);
-                  }}
-                  className={`option-button ${selectedAnswer === option ? 'selected' : ''}`}
-                  disabled={disabled}
-                >
-                  {option}
-                </button>
-              ))
-            ) : (
-              <p>Loading options...</p>
-            )}
-          </div>
-          <div
-            className="btn-container"
-          >
-            <button className="btn-danger" onClick={() => {
-              setIsGameEnded(true);
-              setTimerActive(false);
-              }}>
-              End Game
-            </button>
-            <button
-              onClick = {() => {
-                setIsGameStarted(false);
-                setCurrentRound(0);
-                setScore(0);
-                setMessage('');
-                setChapterUrl('');
-                setTimerActive(false);
-              }}
-              className="btn-danger"
-            >
-              Exit to Lobby
-            </button>
-          </div>
-          
+          </aside>
         </div>
       )}
       {isImageModalOpen && (
