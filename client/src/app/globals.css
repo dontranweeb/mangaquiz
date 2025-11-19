@@ -12,7 +12,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-sceme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
@@ -231,4 +231,74 @@ body {
 .option-button.selected:hover {
   background-color: #2d5a2d;  /* Keep green when hovering over selected */
   border-color: #4caf50;
+}
+
+/* Main Game Layout Container*/
+.game-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr 350px; /* left, center, right */
+  gap: 1.5rem;
+  min-height: 100vh;
+  padding: 1.5rem;
+  max-width: 1600px;  /* prevent it from getting too wide on larger screens */
+  margin: 0 auto;
+}
+
+/* Left Panel - Manga Info Panel */
+.manga-info-panel {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+  position: sticky;
+  top: 1.5rem;
+}
+
+/* Center Panel - Game Content */
+.game-content-panel {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Right Panel - Chat Box */
+.chat-panel {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 3rem); /* Full height minus padding */
+  position: sticky;
+  top: 1.5rem;
+}
+
+/* Responsive Design - Tablet Layout */
+@media (max-width: 1024px) {
+  .game-layout {
+    grid-template-columns: 250px 1fr 300px;
+    gap: 1rem;
+  }
+}
+
+/* Responsive Design - Mobile Layout */
+@media (max-width: 768px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .manga-info-panel,
+  .chat-panel {
+    position: static;
+    height: auto;
+  }
 }

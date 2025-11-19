@@ -48,6 +48,7 @@ export default function Page() {
     setScan(null);
     setId(null);
     setLoading(true);
+    setOptions([]);
 
     let imageFound = false;
     let retryCount = 0;
@@ -107,9 +108,6 @@ export default function Page() {
         [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
       }
 
-      setOptions(allOptions);
-      setSelectedAnswer(null);
-
       if (!fetchedId) continue;
 
       const feedResp = await fetch(`${baseUrl}/manga/${fetchedId}/feed`);
@@ -157,6 +155,8 @@ export default function Page() {
         setTimerActive(true); // Makes sure timer starts when there IS an image
         setCurrentRound((prev) => prev + 1);
         imageFound = true; // Exit the loop, we found an image
+        setOptions(allOptions);
+        setSelectedAnswer(null);
       } else {
         // No image found, will retry
         retryCount++;
@@ -351,13 +351,6 @@ export default function Page() {
           <div
             className="btn-container"
           >
-            <button
-              onClick={loadRandomManga}
-              className="btn-success"
-              disabled={loading}
-            >
-              Next Manga
-            </button>
             <button className="btn-danger" onClick={() => {
               setIsGameEnded(true);
               setTimerActive(false);
