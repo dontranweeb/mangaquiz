@@ -1,0 +1,8 @@
+{
+  "git.confirmSync": true,
+  "git.enableSmartCommit": false,
+  "git.showPushSuccessNotification": true,
+  "scm.confirmSync": true,
+  "git.autoStash": false
+}
+
