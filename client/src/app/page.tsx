@@ -265,46 +265,75 @@ export default function Page() {
     <>
       {!isGameStarted ? (
         // Lobby screen
-        <div className="lobby">
-          <h1 className='lobby-title'> Manga Quiz</h1>
-          <button onClick={() => {
-            setCurrentRound(0); // Reset round
-            setIsGameStarted(true);
-            loadRandomManga();
-          }}
-          className="btn-primary"
-          >
-            Play
-          </button>
+        <div className="landing-page">
+          <div className="landing-container">
+            <h1 className='landing-title'> Manga Quiz</h1>
+            <p className="landing-subtitles">Guess manga/manwha titles from random page previews!</p>
+            <p className="landing-subtitles">Test your knowledge across 20 rounds.</p>
+            <button onClick={() => {
+              setCurrentRound(0); // Reset round
+              setIsGameStarted(true);
+              loadRandomManga();
+            }}
+            className="btn-play-primary"
+            >
+              Play
+            </button>
+          </div>
         </div>
       ) : isGameEnded ? (
         // Results screen
-        <div className="lobby">
-          <h1 className='lobby-title'>Game Over!</h1>
-          <p className="results-score">Final Score: {score} / 20</p>
-          <p className="results-percentage">
-            {Math.round((score / 20) * 100)}% Correct
-          </p>
-          <button className="btn-primary" onClick={() => {
-            setIsGameEnded(false);
-            setIsGameStarted(true);
-            setCurrentRound(0);
-            setScore(0);
-            loadRandomManga();
-          }}>
-            Play Again
-          </button>
-          <button className='btn-danger' onClick={() => {
-            setIsGameStarted(false);
-            setIsGameEnded(false);
-            setCurrentRound(0);
-            setScore(0);
-            setMessage('');
-            setChapterUrl(null);
-            setTimerActive(false);
-          }}>
-            Exit to Lobby
-          </button>
+        <div className="end-game-page">
+          <div className="end-game-container">
+            <h1 className='end-game-title'>Game Over!</h1>
+
+            {/* Results display */}
+            <div className="end-game-stats">
+              <div className="stat-card">
+                <div className="stat-value">{score}</div>
+                <div className="stat-label">Correct</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value incorrect">{20 - score}</div>
+                <div className="stat-label">Incorrect</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{score} / 20</div>
+                <div className="stat-label">Final Score</div>
+              </div>
+            </div>
+
+            {/* Performance message */}
+            <div className="end-game-message">
+              {score >= 18 && <p className="performance-text excellent">Excellent job!</p>}
+              {score >= 14 && score < 18 && <p className="performance-text good">Great job!</p>}
+              {score >= 10 && score < 14 && <p className="performance-text average">Not bad!</p>}
+              {score < 10 && <p className="performance-text needs-improvement">Keep practicing!</p>}
+            </div>
+            
+            <div className='end-game-actions'>
+              <button className="btn-play-again" onClick={() => {
+                setIsGameEnded(false);
+                setIsGameStarted(true);
+                setCurrentRound(0);
+                setScore(0);
+                loadRandomManga();
+              }}>
+                Play Again
+              </button>
+              <button className='btn-exit-lobby' onClick={() => {
+                setIsGameStarted(false);
+                setIsGameEnded(false);
+                setCurrentRound(0);
+                setScore(0);
+                setMessage('');
+                setChapterUrl(null);
+                setTimerActive(false);
+              }}>
+                Back to Home
+              </button>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="game-layout">

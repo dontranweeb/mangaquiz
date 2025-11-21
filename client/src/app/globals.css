@@ -25,32 +25,58 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.lobby {
+.landing-page {
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  background: #0a0a0a;
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  background: #ffffff;
 }
 
-.lobby-title {
-  font-size: 3rem;
+.landing-container {
+  text-align: center;
+  max-width: 800px;
+}
+
+.landing-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-subtitles {
+  font-size: 1.2rem;
+  color: #666;
   margin-bottom: 2rem;
 }
 
-.btn-primary {
+.btn-play-primary {
   padding: 1rem 3rem;
-  font-size: 1.5rem;
-  background-color: #4caf50;
-  color: #fff;
+  font-size: 1.25rem;
+  background: #4caf50;
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-play-primary:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76,175,80,0.3);
 }
 
 .game-container {
@@ -204,26 +230,6 @@ body {
   border: 1px solid #ccc;
   cursor: pointer;
   margin: auto;
-}
-
-.results-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
-}
-
-.resulpts-score {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #4caf50;
-}
-
-.results-percentage {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #4caf50;
 }
 
 .options-container {
@@ -399,4 +405,160 @@ body {
     position: static;
     height: auto;
   }
+}
+
+/* End Game Page Styles */
+.end-game-page {
+  min-height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.end-game-container {
+  max-width: 700px;
+  width: 100%;
+  text-align: center;
+}
+
+.end-game-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+}
+
+/* Simple score display SVG alternative */
+.score-display-large {
+  margin: 2rem 0;
+}
+
+.score-percentage {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #4caf50;
+  margin-bottom: 0.5rem;
+}
+
+.score-fraction {
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.end-game-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4caf50;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value.incorrect {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f44336;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Performance message styles */
+.end-game-message {
+  margin: 2rem 0;
+}
+
+.performance-text {
+  font-size: 1.2rem;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+.performance-text.excellent {
+  color: #4caf50;
+  background: #e8f5e9;
+}
+
+.performance-text.good {
+  color: #2196f3;
+  background: #e3f2fd;
+}
+
+.performance-text.average {
+  color: #ff9800;
+  background: #fff3e0;
+}
+
+.performance-text.needs-improvement {
+  color: #9c27b0;
+  background: #f3e5f5;
+}
+
+/* End Game Actions Styles */
+.end-game-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.btn-play-again {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-play-again:hover {
+  background: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.btn-exit-lobby {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: white;
+  color: #666;
+  border: 2px solid #e5e5e5;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-exit-lobby:hover {
+  border-color: #ccc;
+  background: #f8f9fa;
+  transform: translateY(-2px);
 }
