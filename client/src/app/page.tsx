@@ -1,19 +1,17 @@
 'use client'
 import { useState, useEffect } from 'react';
+import { loadRandomManga as loadRandomMangaPage } from '../services/mangaApi';
 
 export default function Page() {
-  const baseUrl = 'https://api.mangadex.org';
-
   const [title, setTitle] = useState<string | null>(null);       
   const [id, setId] = useState<string | null>(null);                 
   const [chapterUrl, setChapterUrl] = useState<string | null>(null);   // these 3 hold fetched manga info
 
-  const [input, setInput] = useState('');
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [disabled, setDisabled] = useState(false);    // these 4 control the quiz form and feedback
 
-  const [timeLeft, setTimeLeft] = useState<number>(30);
+  const [timeLeft, setTimeLeft] = useState<number>(15);
   const [timerActive, setTimerActive] = useState<boolean>(false);   // these 2 control the timer
   
   const [scan, setScan] = useState<string | null>(null);
@@ -32,13 +30,13 @@ export default function Page() {
   const [previousRoundInfo, setPreviousRoundInfo] = useState<{
     title: string | null,
     scanName: string | null;
-    // other info later
+    website: string | null;
+    twitter: string | null;
   } | null>(null);
   const [showScoreAnimation, setShowScoreAnimation] = useState<boolean>(false);
 
 
   const loadRandomManga = async () => {
-
     if (currentRound >= 20) {
       setIsGameEnded(true);
       setTimerActive(false);
@@ -47,8 +45,7 @@ export default function Page() {
 
     setDisabled(false); //Re-enable form + button
     setTimerActive(false);  //Reset before loading
-    setTimeLeft(30);
-    setInput('');
+    setTimeLeft(15);
     setMessage('');
     setPreviousRoundInfo(null);
     setChapterUrl(null);
@@ -64,51 +61,37 @@ export default function Page() {
     
     while (!imageFound && retryCount < maxRetries) {
       try {
-      // Step 1: Get random manga
-      const resp = await fetch(`${baseUrl}/manga/random?
-        contentRating[]=safe&
-        contentRating[]=suggestive&
-        contentRating[]=erotica&
-        includedTagsMode=AND&
-        excludedTagsMode=OR`);
+      const result = await loadRandomMangaPage();
 
-      // Step 2: Parse response
-      const json = await resp.json();
-      const fetchedTitle = json?.data?.attributes?.title?.en ?? null;
-      const fetchedId = json?.data?.id ?? null;
-      setTitle(fetchedTitle);
-      setId(fetchedId);
-
-      // Fetch 3 random wrong answers
-      const wrongAnswer: string[] = [];
-      let attempts = 0;
-      const maxAttempts = 10; // prevent infinite looping
-
-      while (wrongAnswer.length < 3 && attempts < maxAttempts) {
-        try {
-          const wrongResp = await fetch(`${baseUrl}/manga/random?
-            contentRating[]=safe&
-            contentRating[]=suggestive&
-            contentRating[]=erotica&
-            includedTagsMode=AND&
-            excludedTagsMode=OR`);
-          const wrongJson = await wrongResp.json();
-          const wrongTitle = wrongJson?.data?.attributes?.title?.en ?? null;
-
-          // make sure wrong option is not the same as correct answer and not already in array
-          if (wrongTitle && 
-            wrongTitle.trim().toLowerCase() !== fetchedTitle?.trim().toLowerCase() &&
-          !wrongAnswer.includes(wrongTitle)) {
-            wrongAnswer.push(wrongTitle);
+        if (!result) {
+          retryCount++;
+          // Longer delay between retries to avoid rate limiting
+          if (retryCount < maxRetries) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
           }
-        } catch (err) {
-          console.error('Error fetching wrong answer:', err);
+          continue;
         }
-        attempts++;
+
+      // Set state from service response
+      setTitle(result.manga.title);
+      setId(result.manga.id);
+      setChapterUrl(result.imageUrl);
+
+      // Set scanlation info
+      if (result.scanlationGroup) {
+        setScan(result.scanlationGroup.id);
+        setScanName(result.scanlationGroup.name);
+        setWebsite(result.scanlationGroup.website);
+        setTwitter(result.scanlationGroup.twitter);
+      } else {
+        setScan(null);
+        setScanName(null);
+        setWebsite(null);
+        setTwitter(null);
       }
 
       // Combine correct + wrong answers, then shuffle
-      const allOptions = [fetchedTitle, ...wrongAnswer].filter(Boolean).slice(0,4); // max of 4
+      const allOptions = [result.manga.title, ...result.wrongAnswers].filter(Boolean).slice(0,4); // max of 4
 
       // shuffle array (fisher yates alg)
       for (let i = allOptions.length - 1; i > 0; i--) {
@@ -116,79 +99,31 @@ export default function Page() {
         [allOptions[i], allOptions[j]] = [allOptions[j], allOptions[i]];
       }
 
-      if (!fetchedId) continue;
-
-      const feedResp = await fetch(`${baseUrl}/manga/${fetchedId}/feed`);
-      const feedJson = await feedResp.json();
-      const chapters = feedJson?.data ?? [];
-
-      if (chapters.length === 0) {
-        console.log('No chapters found');
-        continue;
-      }
-
-      // Step 3: Random chapter
-      const randomIndex = Math.floor(Math.random() * chapters.length);
-      const chapterId = chapters[randomIndex].id;
-
-      // Step 4: Get image server URL
-      const serverResp = await fetch(`${baseUrl}/at-home/server/${chapterId}`);
-      const serverJson = await serverResp.json();
-
-      // Step 5: Grabbing scanlator from chapter
-      const scanResp = await fetch(`${baseUrl}/chapter/${chapterId}?includes%5B%5D=scanlation_group`);
-      const scanJson = await scanResp.json();
-      const scanID =  scanJson?.data?.relationships[0].id ?? null;
-      setScan(scanID);
-      const scanName =  scanJson?.data?.relationships[0].attributes?.name ?? null;
-      setScanName(scanName);
-
-      const site = await fetch(`${baseUrl}/group/${scanID}?includes%5B%5D=leader`);
-      const siteJson = await site.json();
-      const site_website =  siteJson?.data?.attributes?.website ?? null;
-      const site_twitter = siteJson?.data?.attributes?.twitter ?? null;
-      setTwitter(site_twitter);
-      setWebsite(site_website);
-      
-      // Build the Image URL
-      const serverUrl = serverJson?.baseUrl;
-      const hash = serverJson?.chapter?.hash;
-      const pageLength = Math.floor(Math.random() * serverJson?.chapter?.dataSaver?.length);
-      const pagePath = serverJson?.chapter?.dataSaver?.[pageLength];
-
-
-      if (serverUrl && hash && pagePath) {
-        const fullImageUrl = `${serverUrl}/data-saver/${hash}/${pagePath}`;
-        setChapterUrl(fullImageUrl);
-        setTimerActive(true); // Makes sure timer starts when there IS an image
-        setCurrentRound((prev) => prev + 1);
-        imageFound = true; // Exit the loop, we found an image
-        setOptions(allOptions);
-        setSelectedAnswer(null);
-      } else {
-        // No image found, will retry
-        retryCount++;
-      }
+      setOptions(allOptions);
+      setSelectedAnswer(null);
+      setTimerActive(true);
+      setCurrentRound((prev) => prev + 1);
+      imageFound = true;
       } catch (err) {
-        console.error('Error fetching manga:', err);
+        console.error('Error loading manga:', err);
         retryCount++;
-        continue; // Skip to next iteration of while loop
-      }
-      
-      // If image wasn't found, increment retry count
-      if (!imageFound) {
-        retryCount++;
+        // Longer delay between retries to avoid rate limiting
+        if (retryCount < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
       }
     }
-    
-    // After while loop ends
-    setLoading(false);
+    if (!imageFound) {
+      setMessage('Failed to load manga after multiple attempts. The API may be temporarily unavailable. Please try again later or check your connection.');
+      setLoading(false);
+      setTimerActive(false);
+      setTimeLeft(15);
+      setDisabled(true);
+      // Don't auto-retry - let user manually retry or exit
+    } else {
+      setLoading(false);
+    }
   };
-
-  // Initial load       --> removed auto loading, we will load when user clicks PLay
-  //useEffect(() => {
-  //  loadRandomManga();
-  //}, []);
 
   const handleAnswer = (selectedOption: string) => {
     if (!title) return;
@@ -214,7 +149,8 @@ export default function Page() {
     setPreviousRoundInfo({
       title: title,
       scanName: scanName,
-      // other fields later
+      website: website,
+      twitter: twitter,
     })
     
 
@@ -227,7 +163,7 @@ export default function Page() {
 
   };
   
-  // Timer of 30 seconds
+  // Timer of 15 seconds
   useEffect(() => {
     if (!timerActive || timeLeft === 0) return;
 
@@ -259,7 +195,7 @@ export default function Page() {
         return () => clearTimeout(nextTimeout) // in case user refreshes 
       }                                      // or program runs loadRandomManga
     }
-  }, [timeLeft]);
+  }, [timeLeft, isGameEnded, selectedAnswer, title]);
 
   return (
     <>
@@ -343,8 +279,17 @@ export default function Page() {
             {title ? (
               <div className="manga-info-content">
                 <p className="manga-title">{previousRoundInfo?.title}</p>
-                {previousRoundInfo?.scanName && <p className="scanlation-name">Scanlations by: {previousRoundInfo.scanName}</p>}
-                {/* more info later */}
+                {previousRoundInfo?.scanName && (
+                  <div className="scanlation-info">
+                    <p className="scanlation-name">Scanlations by: {previousRoundInfo.scanName}</p>
+                    {previousRoundInfo.website && (
+                      <a href={previousRoundInfo.website} target="_blank" rel="noopener noreferrer" className="scanlation-link">Website</a>
+                    )}
+                    {previousRoundInfo.twitter && (
+                      <a href={previousRoundInfo.twitter} target="_blank" rel="noopener noreferrer" className="scanlation-link">Twitter</a>
+                    )}
+                  </div>
+                )}
               </div>
             ) : (
               <p className="panel-placeholder">Info will appear after each round</p>
@@ -387,6 +332,15 @@ export default function Page() {
                   alt="Manga Page"
                   onClick={() => setIsimageModalOpen(true)}
                   className="manga-image"
+                  crossOrigin="anonymous"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    console.error('Image failed to load:', chapterUrl);
+                    console.error('Error event:', e);
+                  }}
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', chapterUrl);
+                  }}
                 />
               </div>
             ) : (

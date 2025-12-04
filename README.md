@@ -20,4 +20,9 @@ Grateful to Mangadex for providing this API allowing us to play "quiz" like game
 ✅ Frontend implemented and functional
 ✅ Game logic complete with rounds, scoring, and timer
 ✅ Multiple choice quiz format
+✅ Currently using CORS for mangaPage loading since local host...
 🔄 Chat feature and multiplayer (coming soon)
+
+## Future implementations
+
+🔄 During deployment phase, switch from CORS to Next.JS API route proxy (/api/manga-image/route.ts) since MangaDex API does not support CORS for external domains.
