@@ -3,6 +3,7 @@
   "git.enableSmartCommit": false,
   "git.showPushSuccessNotification": true,
   "scm.confirmSync": true,
-  "git.autoStash": false
+  "git.autoStash": false,
+  "css.lint.unknownAtRules": "ignore"
 }
 

@@ -79,20 +79,6 @@ body {
   box-shadow: 0 4px 12px rgba(76,175,80,0.3);
 }
 
-.game-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: Arial, Helvetica, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 .game-title {
   font-size: 2rem;
   font-weight: bold;
@@ -154,16 +140,6 @@ body {
   text-align: center;
 }
 
-.form-input {
-  padding: 0.5rem;
-  font-size: 1rem;
-}
-
-.btn-submit {
-  margin-left: 1rem;
-  padding: 0.5rem 1rem;
-}
-
 .message-text {
   margin-bottom: 1rem;
 }
@@ -172,14 +148,6 @@ body {
   display: flex;
   gap: 0.75rem;
   margin-top: 1rem;
-}
-
-.btn-success {
-  padding: 0.5rem 1rem;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  cursor: pointer;
 }
 
 .btn-danger {
@@ -232,6 +200,17 @@ body {
   margin: auto;
 }
 
+.results-score {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.results-percentage {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #4caf50;
+}
 .options-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
