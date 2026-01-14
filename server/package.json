@@ -1,0 +1,18 @@
+{
+    "name": "mangaquiz-server",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Socket.IO server for MangaQuiz multiplayer",
+    "main": "server.js",
+    "type": "commonjs",
+    "scripts": {
+      "dev": "node server.js",
+      "start": "node server.js"
+    },
+    "keywords": ["socket.io", "mangaquiz"],
+    "dependencies": {
+      "express": "^4.18.2",
+      "socket.io": "^4.7.2",
+      "cors": "^2.8.5"
+    }
+  }
