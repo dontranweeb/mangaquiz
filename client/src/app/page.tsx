@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react';
 import { loadRandomManga as loadRandomMangaPage } from '../services/mangaApi';
+import { connectSocket, getSocket, disconnectSocket, joinGame } from '../services/socketService';
 
 export default function Page() {
   const [title, setTitle] = useState<string | null>(null);       
@@ -197,6 +198,42 @@ export default function Page() {
     }
   }, [timeLeft, isGameEnded, selectedAnswer, title]);
 
+  // Socket.IO Connection
+  useEffect(() => {
+    // Connect to server
+    connectSocket();
+
+    const socket = getSocket();
+    if (socket) {
+      // Listen for server events
+
+      socket.on('joined', (data) => {
+        console.log('Joined game:', data);
+        // data = { success: true, socketId: '...', username: '...' totalPlayers: 1 }
+      });
+
+      socket.on('playerJoined', (data) => {
+        console.log('Another player joined:', data);
+        // data = { username: '...', totalPlayers = 2 }
+      });
+
+      socket.on('playerLeft', (data) => {
+        console.log('Player left:', data);
+        // data = { username: '...', totalPlayers = 1 }
+      });
+    }
+
+    // Cleanup: remove listeners and disconnect when component unmounts
+    return () => {
+      if (socket) {
+        socket.off('joined');
+        socket.off('playerJoined');
+        socket.off('playerLeft');
+      }
+      disconnectSocket();
+    };
+  }, []);
+
   return (
     <>
       {!isGameStarted ? (
@@ -214,6 +251,20 @@ export default function Page() {
             className="btn-play-primary"
             >
               Play
+            </button>
+            <button
+              onClick={() => joinGame('Test Player')}
+              style= {{
+                padding: '10px',
+                margin: '10px',
+                backgroundColor: '#4caf50',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              Test Join Game
             </button>
           </div>
         </div>
